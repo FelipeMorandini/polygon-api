@@ -31,3 +31,50 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Miscellaneous
+*.java.hsp
+*.sonarj
+*.sw*
+.DS_Store
+build.sh
+integration-repo
+ivy-cache
+argfile*
+activemq-data/
+classes/
+
+# Log files
+jxl.log
+jmx.log
+derby.log
+
+# Gradle artifacts
+.gradle
+.gradletasknamecache
+/build
+buildSrc/build
+/spring-*/build
+/framework-*/build
+/integration-tests/build
+/src/asciidoc/build
+spring-test/test-output/
+
+# Maven artifacts
+pom.xml
+/target/
+
+# Eclipse artifacts, including WTP generated manifests
+bin
+spring-*/src/main/java/META-INF/MANIFEST.MF
+
+.idea/*
+!.idea/icon.svg
+out
+test-output
+atlassian-ide-plugin.xml
+
+cached-antora-playbook.yml
+
+node_modules
+/.kotlin/
