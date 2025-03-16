@@ -35,7 +35,7 @@ public class StockPriceController {
      * @return A ResponseEntity containing a list of StockPrice objects that were successfully retrieved
      *         and saved. If no data was found or an error occurred, an appropriate HTTP response is returned.
      */
-    @PostMapping("/fetch")
+    @GetMapping("/fetch")
     public ResponseEntity<List<StockPrice>> fetchAndSaveStockPrices(
             @RequestParam String companySymbol,
             @RequestParam String fromDate,
