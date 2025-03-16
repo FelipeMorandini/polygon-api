@@ -11,6 +11,9 @@ import com.leadiq.polygonapi.repository.StockPriceRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -34,17 +37,18 @@ public class StockPriceService {
 
     /**
      * Fetches stock price data for a given stock symbol within a specified date range,
-     * parses the data, and saves it to the repository. Returns the list of saved stock prices.
+     * parses the data, and saves it to the repository. Returns a paginated list of saved stock prices.
      *
      * @param symbol The stock symbol for which to fetch the price data. Cannot be null or empty.
      * @param fromDate The start date of the range for which to fetch stock price data. Cannot be null or empty.
      * @param toDate The end date of the range for which to fetch stock price data. Cannot be null or empty.
-     * @return A list of StockPrice objects that were successfully fetched and saved.
+     * @param pageable Pagination information including page number and size.
+     * @return A Page of StockPrice objects that were successfully fetched and saved.
      * @throws IllegalArgumentException If the input parameters are null or empty.
      * @throws PolygonApiException If there is an error while fetching data from the Polygon API.
      * @throws RuntimeException If an unexpected error occurs during processing.
      */
-    public List<StockPrice> fetchAndSavePrices(String symbol, String fromDate, String toDate) {
+    public Page<StockPrice> fetchAndSavePrices(String symbol, String fromDate, String toDate, Pageable pageable) {
         if (symbol == null || symbol.trim().isEmpty()) {
             throw new IllegalArgumentException("Stock symbol cannot be null or empty");
         }
@@ -60,16 +64,25 @@ public class StockPriceService {
         logger.info("Fetching stock prices for symbol {} from {} to {}", symbol, fromDate, toDate);
 
         try {
+            // First fetch and save all the data
             String polygonResponse = polygonClient.fetchStockData(symbol, fromDate, toDate);
             List<StockPrice> stockPrices = parsePolygonResponse(symbol, polygonResponse);
 
             if (stockPrices.isEmpty()) {
                 logger.warn("No stock price data found for symbol {} in the specified date range", symbol);
-                return stockPrices;
+                return Page.empty(pageable);
             }
 
             logger.info("Saving {} stock price records for symbol {}", stockPrices.size(), symbol);
-            return stockPriceRepository.saveAll(stockPrices);
+            stockPriceRepository.saveAll(stockPrices);
+
+            // Then retrieve the paginated results
+            return stockPriceRepository.findByCompanySymbolAndDateBetween(
+                symbol,
+                LocalDate.parse(fromDate),
+                LocalDate.parse(toDate),
+                pageable
+            );
         } catch (PolygonApiException e) {
             logger.error("Error fetching stock data from Polygon API", e);
             throw e;
@@ -88,6 +101,7 @@ public class StockPriceService {
      * @throws IllegalArgumentException if the symbol is null, empty, or the date is null
      * @throws StockDataNotFoundException if no stock data is found for the specified symbol and date
      */
+    @Cacheable(value = "stockPrices", key = "#symbol + '_' + #date")
     public StockPrice getStockPrice(String symbol, LocalDate date) {
         if (symbol == null || symbol.trim().isEmpty()) {
             throw new IllegalArgumentException("Stock symbol cannot be null or empty");

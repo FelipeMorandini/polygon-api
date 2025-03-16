@@ -3,12 +3,13 @@ package com.leadiq.polygonapi.controller;
 import com.leadiq.polygonapi.entity.StockPrice;
 import com.leadiq.polygonapi.service.StockPriceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * StockPriceController is a REST controller responsible for managing stock price data.
@@ -16,35 +17,41 @@ import java.util.List;
  * for a specific company symbol on a given date.
  */
 @RestController
-@RequestMapping("/stocks")
+@RequestMapping("/api/v1/stocks")
 @RequiredArgsConstructor
 public class StockPriceController {
 
     private final StockPriceService stockPriceService;
 
     /**
-     * Fetches stock price data for a given company symbol within the specified date range,
-     * saves the data to the database, and returns the list of saved stock prices.
+     * Fetches and saves stock prices for a specific company over a given date range.
+     * The method retrieves stock price data for the specified company from an external
+     * service or data source, saves the data to the database, and supports pagination of
+     * the results.
      *
-     * @param companySymbol The stock symbol representing the company (e.g., "AAPL" for Apple Inc.).
-     *                       Must be a non-empty string.
-     * @param fromDate       The start date for the stock data retrieval in the format "YYYY-MM-DD".
-     *                       Must be a valid date string.
-     * @param toDate         The end date for the stock data retrieval in the format "YYYY-MM-DD".
-     *                       Must be a valid date string.
-     * @return A ResponseEntity containing a list of StockPrice objects that were successfully retrieved
-     *         and saved. If no data was found or an error occurred, an appropriate HTTP response is returned.
+     * @param companySymbol the stock symbol of the company whose prices are to be fetched; must not be null or empty
+     * @param fromDate the start date of the date range for which stock prices are to be fetched, formatted as ISO_DATE (YYYY-MM-DD); must not be null
+     * @param toDate the end date of the date range for which stock prices are to be fetched, formatted as ISO_DATE (YYYY-MM-DD); must not be null
+     * @param page the page number for pagination; defaults to 0 if not specified
+     * @param size the number of records per page for pagination; defaults to 20 if not specified
+     * @return a ResponseEntity containing a Page of StockPrice objects with the fetched and saved stock price data
+     * @throws IllegalArgumentException if the fromDate is after the toDate
      */
     @GetMapping("/fetch")
-    public ResponseEntity<List<StockPrice>> fetchAndSaveStockPrices(
+    public ResponseEntity<Page<StockPrice>> fetchAndSaveStockPrices(
             @RequestParam String companySymbol,
-            @RequestParam String fromDate,
-            @RequestParam String toDate
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
     ) {
-        List<StockPrice> saved = stockPriceService.fetchAndSavePrices(companySymbol, fromDate, toDate);
+        if (fromDate.isAfter(toDate)) {
+            throw new IllegalArgumentException("From date cannot be after to date");
+        }
+        Page<StockPrice> saved = stockPriceService.fetchAndSavePrices(
+                companySymbol, fromDate.toString(), toDate.toString(), PageRequest.of(page, size));
         return ResponseEntity.ok(saved);
     }
-
 
     /**
      * Retrieves the stock price for a specific company symbol on a given date.
@@ -59,9 +66,5 @@ public class StockPriceController {
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
         StockPrice sp = stockPriceService.getStockPrice(symbol, date);
-        if (sp == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(sp);
-    }
-}
+    }}
