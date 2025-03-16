@@ -27,7 +27,12 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "stock_price", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"company_symbol", "date"})
-})
+        },
+        indexes = {
+                @Index(name = "idx_company_symbol", columnList = "company_symbol"),
+                @Index(name = "idx_date", columnList = "date")
+        }
+)
 public class StockPrice {
 
     @Id
