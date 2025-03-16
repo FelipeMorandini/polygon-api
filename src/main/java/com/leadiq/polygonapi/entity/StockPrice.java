@@ -7,15 +7,12 @@ import java.time.LocalDate;
 
 /**
  * Represents the stock price information for a specific company on a particular date.
- *
  * This entity is mapped to the "stock_price" table in the database and includes fields
  * for storing key financial data such as opening price, closing price, highest price,
  * lowest price, and trading volume for a company's stock.
- *
  * Each instance of this class corresponds to a single record in the "stock_price" table.
  * The class is annotated with JPA and Lombok annotations to support persistence and
  * reduce boilerplate code.
- *
  * Fields:
  * - id: The unique identifier for the stock price record.
  * - companySymbol: The stock symbol representing the company (e.g., "AAPL" for Apple Inc.).
