@@ -129,6 +129,11 @@ public class StockPriceController {
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
         StockPrice stockPrice = stockPriceService.getStockPrice(symbol, date);
+
+        if (stockPrice == null) {
+            return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.ok(convertToDTO(stockPrice));
     }
 

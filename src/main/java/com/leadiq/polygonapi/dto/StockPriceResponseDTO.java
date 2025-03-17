@@ -19,7 +19,7 @@ public class StockPriceResponseDTO {
     @Schema(description = "Stock symbol representing the company", example = "AAPL")
     private String symbol;
 
-    @Schema(description = "Date of the stock price information", example = "2023-01-15")
+    @Schema(description = "Date of the stock price information", example = "2025-03-14")
     private LocalDate date;
 
     @Schema(description = "Opening price of the stock", example = "150.25")
