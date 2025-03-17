@@ -91,19 +91,13 @@ public class GlobalExceptionHandler {
      * @return a {@code ResponseEntity} containing the error details and HTTP status of {@code NOT_FOUND}
      */
     @ExceptionHandler(StockDataNotFoundException.class)
-    public ResponseEntity<Object> handleStockDataNotFoundException(StockDataNotFoundException ex, WebRequest request) {
-        logger.warn("Stock data not found: {}", ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleStockDataNotFoundException(
+            StockDataNotFoundException ex, WebRequest request) {
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", "Not Found");
-        body.put("message", ex.getMessage());
-        body.put("symbol", ex.getSymbol());
-        body.put("date", ex.getDate());
-        body.put("path", request.getDescription(false));
+        String path = request.getDescription(false);
+        ErrorResponse errorResponse = new ErrorResponse("NOT_FOUND", ex.getMessage(), path);
 
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     /**

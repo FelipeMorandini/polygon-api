@@ -1,7 +1,17 @@
 package com.leadiq.polygonapi.controller;
 
+import com.leadiq.polygonapi.config.OpenApiTagConfig;
+import com.leadiq.polygonapi.dto.StockPriceResponseDTO;
 import com.leadiq.polygonapi.entity.StockPrice;
+import com.leadiq.polygonapi.exception.ErrorResponse;
 import com.leadiq.polygonapi.service.StockPriceService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,52 +29,121 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/v1/stocks")
 @RequiredArgsConstructor
+@Tag(name = OpenApiTagConfig.TAG_STOCK_PRICES)
 public class StockPriceController {
 
     private final StockPriceService stockPriceService;
 
     /**
-     * Fetches and saves stock prices for a specific company over a given date range.
-     * The method retrieves stock price data for the specified company from an external
-     * service or data source, saves the data to the database, and supports pagination of
-     * the results.
-     *
-     * @param companySymbol the stock symbol of the company whose prices are to be fetched; must not be null or empty
-     * @param fromDate the start date of the date range for which stock prices are to be fetched, formatted as ISO_DATE (YYYY-MM-DD); must not be null
-     * @param toDate the end date of the date range for which stock prices are to be fetched, formatted as ISO_DATE (YYYY-MM-DD); must not be null
-     * @param page the page number for pagination; defaults to 0 if not specified
-     * @param size the number of records per page for pagination; defaults to 20 if not specified
-     * @return a ResponseEntity containing a Page of StockPrice objects with the fetched and saved stock price data
-     * @throws IllegalArgumentException if the fromDate is after the toDate
+     * Fetches stock price data for a given company symbol within the specified date range,
+     * saves the data to the database, and returns the list of saved stock prices.
      */
+    @Operation(
+            summary = "Fetch and save stock prices",
+            description = "Fetches stock price data for a given company symbol within the specified date range, " +
+                    "saves the data to the database, and returns a paginated list of saved stock prices."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved stock prices",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Page.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input parameters",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "503",
+                    description = "Polygon API service unavailable",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     @GetMapping("/fetch")
-    public ResponseEntity<Page<StockPrice>> fetchAndSaveStockPrices(
+    public ResponseEntity<Page<StockPriceResponseDTO>> fetchAndSaveStockPrices(
+            @Parameter(description = "Stock symbol (e.g., AAPL)", required = true, example = "AAPL")
             @RequestParam String companySymbol,
+
+            @Parameter(description = "Start date in ISO format (YYYY-MM-DD)", required = true, example = "2023-01-01")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+
+            @Parameter(description = "End date in ISO format (YYYY-MM-DD)", required = true, example = "2023-01-31")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+
+            @Parameter(description = "Page number (zero-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+
+            @Parameter(description = "Number of items per page", example = "20")
             @RequestParam(defaultValue = "20") int size
     ) {
         if (fromDate.isAfter(toDate)) {
             throw new IllegalArgumentException("From date cannot be after to date");
         }
-        Page<StockPrice> saved = stockPriceService.fetchAndSavePrices(
+
+        Page<StockPrice> stockPrices = stockPriceService.fetchAndSavePrices(
                 companySymbol, fromDate.toString(), toDate.toString(), PageRequest.of(page, size));
-        return ResponseEntity.ok(saved);
+
+        // Convert to DTO page
+        Page<StockPriceResponseDTO> dtoPage = stockPrices.map(this::convertToDTO);
+
+        return ResponseEntity.ok(dtoPage);
     }
 
     /**
      * Retrieves the stock price for a specific company symbol on a given date.
-     *
-     * @param symbol the stock symbol of the company to look up; must not be null or empty
-     * @param date the date for which the stock price is to be retrieved, formatted as ISO_DATE (YYYY-MM-DD); must not be null
-     * @return a ResponseEntity containing the StockPrice object if data is found, or a ResponseEntity with a NOT_FOUND status if no data exists
      */
+    @Operation(
+            summary = "Get stock price by symbol and date",
+            description = "Retrieves the stock price for a specific company symbol on a given date."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved stock price",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = StockPriceResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Stock price not found for the given symbol and date",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input parameters",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     @GetMapping("/{symbol}")
-    public ResponseEntity<StockPrice> getStockPriceBySymbolAndDate(
+    public ResponseEntity<StockPriceResponseDTO> getStockPriceBySymbolAndDate(
+            @Parameter(description = "Stock symbol (e.g., AAPL)", required = true, example = "AAPL")
             @PathVariable("symbol") String symbol,
+
+            @Parameter(description = "Date in ISO format (YYYY-MM-DD)", required = true, example = "2023-01-15")
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        StockPrice sp = stockPriceService.getStockPrice(symbol, date);
-        return ResponseEntity.ok(sp);
-    }}
+        StockPrice stockPrice = stockPriceService.getStockPrice(symbol, date);
+        return ResponseEntity.ok(convertToDTO(stockPrice));
+    }
+
+    /**
+     * Converts a StockPrice entity to a StockPriceResponseDTO
+     */
+    private StockPriceResponseDTO convertToDTO(StockPrice stockPrice) {
+        return new StockPriceResponseDTO(
+                stockPrice.getCompanySymbol(),
+                stockPrice.getDate(),
+                stockPrice.getOpenPrice(),
+                stockPrice.getClosePrice(),
+                stockPrice.getHighPrice(),
+                stockPrice.getLowPrice(),
+                stockPrice.getVolume()
+        );
+    }
+}
