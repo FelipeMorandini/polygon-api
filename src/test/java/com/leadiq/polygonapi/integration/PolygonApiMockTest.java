@@ -7,6 +7,7 @@ import com.leadiq.polygonapi.config.PolygonApiConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -28,12 +29,16 @@ public abstract class PolygonApiMockTest extends BaseIntegrationTest {
 
     @TestConfiguration
     static class PolygonApiTestConfig {
+
+        @Value("${polygon.api.key}")
+        private String apiKey;
+
         @Bean
         @Primary
         public PolygonApiConfig testPolygonApiConfig() {
             PolygonApiConfig config = new PolygonApiConfig();
             config.setBaseUrl("http://localhost:9999");
-            config.setKey("test-api-key");
+            config.setKey(apiKey);
             config.setTimeout(1000);
             config.setMaxRetries(1);
             return config;
@@ -53,12 +58,11 @@ public abstract class PolygonApiMockTest extends BaseIntegrationTest {
     }
 
     protected void setupMockSuccessResponse(String symbol, String fromDate, String toDate, String responseBody) {
-        // Using 1 and day as standard values for multiplier and timespan
         wireMockServer.stubFor(get(urlPathMatching("/v2/aggs/ticker/" + symbol + "/range/1/day/" + fromDate + "/" + toDate))
                 .withQueryParam("adjusted", equalTo("true"))
                 .withQueryParam("sort", equalTo("asc"))
                 .withQueryParam("limit", equalTo("120"))
-                .withQueryParam("apiKey", equalTo("_N0Gqe9d6aVO9m2C0SuMjGvc36B_pRQN"))
+                .withQueryParam("apiKey", equalTo(polygonApiConfig.getKey()))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -67,12 +71,11 @@ public abstract class PolygonApiMockTest extends BaseIntegrationTest {
 
 
     protected void setupMockErrorResponse(String symbol, int statusCode, String errorMessage) {
-        // Using 1 and day as standard values for multiplier and timespan
         wireMockServer.stubFor(get(urlPathMatching("/v2/aggs/ticker/" + symbol + "/range/1/day/.+/.+"))
                 .withQueryParam("adjusted", equalTo("true"))
                 .withQueryParam("sort", equalTo("asc"))
                 .withQueryParam("limit", equalTo("120"))
-                .withQueryParam("apiKey", equalTo("_N0Gqe9d6aVO9m2C0SuMjGvc36B_pRQN"))
+                .withQueryParam("apiKey", equalTo(polygonApiConfig.getKey()))
                 .willReturn(aResponse()
                         .withStatus(statusCode)
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
