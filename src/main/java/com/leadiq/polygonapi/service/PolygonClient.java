@@ -22,8 +22,8 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class PolygonClient {
     private final PolygonApiConfig config;
+    private final RestTemplate restTemplate;
     private static final Logger logger = LoggerFactory.getLogger(PolygonClient.class);
-    private final RestTemplate restTemplate = new RestTemplate();
 
     /**
      * Fetches stock market data for a given ticker symbol within a specified date range.
