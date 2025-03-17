@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,6 +86,9 @@ public class StockPriceService {
             );
         } catch (PolygonApiException e) {
             logger.error("Error fetching stock data from Polygon API", e);
+            throw e;
+        } catch (StockDataParsingException e) {
+            logger.error("Error parsing stock data", e);
             throw e;
         } catch (Exception e) {
             logger.error("Unexpected error in fetchAndSavePrices", e);
@@ -169,15 +173,44 @@ public class StockPriceService {
                         continue;
                     }
 
-                    String dateStr = dayData.get("t").asText();
-                    if (dateStr.matches("\\d+")) {
-                        LocalDate date = Instant.ofEpochMilli(Long.parseLong(dateStr))
+                    JsonNode timeNode = dayData.get("t");
+                    LocalDate date;
+
+                    if (timeNode.isNumber()) {
+                        // Handle numeric timestamp
+                        long timestamp = timeNode.asLong();
+
+                        // If timestamp is in seconds (pre-2000), convert to milliseconds
+                        if (timestamp < 946684800000L) { // Jan 1, 2000 timestamp in ms
+                            timestamp *= 1000;
+                        }
+
+                        date = Instant.ofEpochMilli(timestamp)
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDate();
-                        sp.setDate(date);
                     } else {
-                        sp.setDate(LocalDate.parse(dateStr));
+                        // Handle string date format
+                        String dateStr = timeNode.asText();
+
+                        try {
+                            date = LocalDate.parse(dateStr); // Standard ISO format (YYYY-MM-DD)
+                        } catch (Exception e) {
+                            try {
+                                // Try with time component
+                                if (dateStr.contains("T")) {
+                                    int tIndex = dateStr.indexOf('T');
+                                    date = LocalDate.parse(dateStr.substring(0, tIndex));
+                                } else {
+                                    throw new IllegalArgumentException("Unrecognized date format: " + dateStr);
+                                }
+                            } catch (Exception e2) {
+                                logger.warn("Failed to parse date: {}", dateStr);
+                                continue; // Skip this record if we can't parse the date
+                            }
+                        }
                     }
+
+                    sp.setDate(date);
 
                     // Check for required fields
                     if (!dayData.has("o") || !dayData.has("h") || !dayData.has("l") ||
