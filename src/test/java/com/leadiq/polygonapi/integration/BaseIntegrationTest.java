@@ -5,29 +5,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Testcontainers
 public abstract class BaseIntegrationTest {
 
-    @Container
-    static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("integration-tests-db")
-            .withUsername("testuser")
-            .withPassword("testpass");
-
     @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mySQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mySQLContainer::getUsername);
-        registry.add("spring.datasource.password", mySQLContainer::getPassword);
-        registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
-        registry.add("polygon.api.key", () -> "test-api-key");
+    static void registerH2Properties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", () -> "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1");
+        registry.add("spring.datasource.username", () -> "sa");
+        registry.add("spring.datasource.password", () -> "");
+        registry.add("spring.datasource.driver-class-name", () -> "org.h2.Driver");
+        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.H2Dialect");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("polygon.api.baseUrl", () -> "http://localhost:9999");
     }
 }
