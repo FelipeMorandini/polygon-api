@@ -1,4 +1,4 @@
-package com.leadiq.polygonapi.config;
+package com.leadiq.polygonapi.config.client;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

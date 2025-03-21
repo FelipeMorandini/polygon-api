@@ -1,4 +1,4 @@
-package com.leadiq.polygonapi.config;
+package com.leadiq.polygonapi.config.openapi;
 
 import io.swagger.v3.oas.models.tags.Tag;
 import org.springdoc.core.customizers.OpenApiCustomizer;

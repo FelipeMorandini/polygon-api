@@ -3,7 +3,7 @@ package com.leadiq.polygonapi.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.leadiq.polygonapi.config.PolygonApiConfig;
+import com.leadiq.polygonapi.config.client.PolygonApiConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

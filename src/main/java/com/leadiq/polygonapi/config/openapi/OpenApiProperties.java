@@ -1,4 +1,4 @@
-package com.leadiq.polygonapi.config;
+package com.leadiq.polygonapi.config.openapi;
 
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;

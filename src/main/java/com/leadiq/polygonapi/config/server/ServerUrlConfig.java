@@ -1,4 +1,4 @@
-package com.leadiq.polygonapi.config;
+package com.leadiq.polygonapi.config.server;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

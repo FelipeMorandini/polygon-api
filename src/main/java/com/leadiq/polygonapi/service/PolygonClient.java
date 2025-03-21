@@ -1,6 +1,6 @@
 package com.leadiq.polygonapi.service;
 
-import com.leadiq.polygonapi.config.PolygonApiConfig;
+import com.leadiq.polygonapi.config.client.PolygonApiConfig;
 import com.leadiq.polygonapi.exception.PolygonApiException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

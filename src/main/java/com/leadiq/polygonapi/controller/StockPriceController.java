@@ -1,6 +1,6 @@
 package com.leadiq.polygonapi.controller;
 
-import com.leadiq.polygonapi.config.OpenApiTagConfig;
+import com.leadiq.polygonapi.config.openapi.OpenApiTagConfig;
 import com.leadiq.polygonapi.dto.StockPriceResponseDTO;
 import com.leadiq.polygonapi.entity.StockPrice;
 import com.leadiq.polygonapi.exception.ErrorResponse;

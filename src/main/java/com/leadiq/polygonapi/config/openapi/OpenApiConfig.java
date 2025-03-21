@@ -1,5 +1,6 @@
-package com.leadiq.polygonapi.config;
+package com.leadiq.polygonapi.config.openapi;
 
+import com.leadiq.polygonapi.config.server.ServerUrlConfig;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -20,8 +21,8 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.leadiq.polygonapi.config.OpenApiTags.getTags;
-import static com.leadiq.polygonapi.config.ValidationSchemas.getCommonSchemas;
+import static com.leadiq.polygonapi.config.openapi.OpenApiTags.getTags;
+import static com.leadiq.polygonapi.config.openapi.ValidationSchemas.getCommonSchemas;
 
 /**
  * OpenApiConfig is a configuration class for setting up OpenAPI specifications and server

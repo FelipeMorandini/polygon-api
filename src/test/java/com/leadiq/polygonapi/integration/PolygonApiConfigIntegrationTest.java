@@ -1,6 +1,6 @@
 package com.leadiq.polygonapi.integration;
 
-import com.leadiq.polygonapi.config.PolygonApiConfig;
+import com.leadiq.polygonapi.config.client.PolygonApiConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -1,6 +1,6 @@
 package com.leadiq.polygonapi;
 
-import com.leadiq.polygonapi.config.OpenApiProperties;
+import com.leadiq.polygonapi.config.openapi.OpenApiProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

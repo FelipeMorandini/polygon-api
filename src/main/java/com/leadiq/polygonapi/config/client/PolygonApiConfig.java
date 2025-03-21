@@ -1,4 +1,4 @@
-package com.leadiq.polygonapi.config;
+package com.leadiq.polygonapi.config.client;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
