@@ -55,6 +55,12 @@ services:
 
       # Spring Profile
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+
+      # Log Configuration
+      ROOT_LOG_LEVEL: ${ROOT_LOG_LEVEL}
+      POLYGON_API_LOG_LEVEL: ${POLYGON_API_LOG_LEVEL}
+      POLYGON_API_CONFIG_LOG_LEVEL: ${POLYGON_API_CONFIG_LOG_LEVEL}
+      LOG_FILE_PATH: ${LOG_FILE_PATH:-/app/logs/polygon-api.log}
     ports:
       - "127.0.0.1:8080:8080"
     healthcheck:

@@ -17,5 +17,10 @@ ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseContainerSupport"
 
 RUN groupadd -g 1001 appuser && \
     useradd -u 1001 -g appuser -s /bin/sh -m appuser
+
+RUN mkdir -p /app/logs && \
+    chown -R appuser:appuser /app/logs
+
 USER appuser
+
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
