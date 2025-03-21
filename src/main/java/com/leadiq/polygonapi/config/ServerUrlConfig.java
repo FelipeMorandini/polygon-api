@@ -1,5 +1,6 @@
 package com.leadiq.polygonapi.config;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -11,11 +12,35 @@ import org.springframework.stereotype.Component;
  * This class is designed to provide easy access to these URLs, ensuring that
  * the correct server URL is used based on the running environment.
  */
+@Getter
 @Component
 public class ServerUrlConfig {
+    /**
+     * -- GETTER --
+     *  Retrieves the default server URL configured for the application. This URL
+     *  typically serves as the base URL for API documentation or application endpoints.
+     */
     private final String defaultUrl;
+    /**
+     * -- GETTER --
+     *  Retrieves the developer-specific server URL configured for the application.
+     *  This URL is typically used for development environments and may differ from
+     *  production or staging URLs.
+     */
     private final String devUrl;
+    /**
+     * -- GETTER --
+     *  Retrieves the staging server URL configured for the application.
+     *  This URL is typically used for staging environments where applications
+     *  can be tested before moving to production.
+     */
     private final String stagingUrl;
+    /**
+     * -- GETTER --
+     *  Retrieves the production server URL configured for the application.
+     *  This URL is typically used in production environments where
+     *  live application services are provided to end users.
+     */
     private final String prodUrl;
 
     /**
@@ -41,38 +66,4 @@ public class ServerUrlConfig {
         this.prodUrl = prodUrl;
     }
 
-    /**
-     * Retrieves the default server URL configured for the application. This URL
-     * typically serves as the base URL for API documentation or application endpoints.
-     *
-     * @return the default server URL as a String
-     */
-    public String getDefaultUrl() { return defaultUrl; }
-
-    /**
-     * Retrieves the developer-specific server URL configured for the application.
-     * This URL is typically used for development environments and may differ from
-     * production or staging URLs.
-     *
-     * @return the developer-specific server URL as a String
-     */
-    public String getDevUrl() { return devUrl; }
-
-    /**
-     * Retrieves the staging server URL configured for the application.
-     * This URL is typically used for staging environments where applications
-     * can be tested before moving to production.
-     *
-     * @return the staging server URL as a String
-     */
-    public String getStagingUrl() { return stagingUrl; }
-
-    /**
-     * Retrieves the production server URL configured for the application.
-     * This URL is typically used in production environments where
-     * live application services are provided to end users.
-     *
-     * @return the production server URL as a String
-     */
-    public String getProdUrl() { return prodUrl; }
 }
