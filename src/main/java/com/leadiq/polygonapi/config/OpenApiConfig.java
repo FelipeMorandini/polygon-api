@@ -94,18 +94,18 @@ public class OpenApiConfig {
         }
 
         if (!StringUtils.hasText(devServerUrl)) {
-            logger.warn("Development server URL is not configured");
+            logger.warn("[{}] Development server URL is not configured", applicationName);
         }
 
         if (!StringUtils.hasText(stagingServerUrl)) {
-            logger.warn("Staging server URL is not configured");
+            logger.warn("[{}] Staging server URL is not configured", applicationName);
         }
 
         if (!StringUtils.hasText(prodServerUrl)) {
-            logger.warn("Production server URL is not configured");
+            logger.warn("[{}] Production server URL is not configured", applicationName);
         }
 
-        logger.info("OpenAPI configuration validated successfully");
+        logger.info("[{}] OpenAPI configuration validated successfully", applicationName);
     }
 
     /**
@@ -121,7 +121,7 @@ public class OpenApiConfig {
      */
     @Bean
     public OpenAPI customOpenAPI() {
-        logger.info("Configuring OpenAPI documentation for {}", applicationName);
+        logger.info("[{}] Configuring OpenAPI documentation", applicationName);
         Components components = new Components()
                 .addSecuritySchemes("bearer-key",
                         new SecurityScheme()
@@ -140,12 +140,12 @@ public class OpenApiConfig {
                         .description("This API provides access to stock market data through the Polygon.io service.")
                         .termsOfService(properties.getTermsOfServiceUrl())
                         .contact(new Contact()
-                                .name(properties.getContact().getName())
-                                .url(properties.getContact().getUrl())
-                                .email(properties.getContact().getEmail()))
+                                .name(properties.getContact().name())
+                                .url(properties.getContact().url())
+                                .email(properties.getContact().email()))
                         .license(new License()
-                                .name(properties.getLicense().getName())
-                                .url(properties.getLicense().getUrl())))
+                                .name(properties.getLicense().name())
+                                .url(properties.getLicense().url())))
                 .servers(getServers())
                 .components(components)
                 .tags(getTags())
