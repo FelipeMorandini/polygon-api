@@ -24,17 +24,17 @@ import static com.leadiq.polygonapi.config.OpenApiTags.getTags;
 import static com.leadiq.polygonapi.config.ValidationSchemas.getCommonSchemas;
 
 /**
- * Configuration class for setting up OpenAPI documentation in the application.
- * This class defines the settings and components for the OpenAPI specification,
- * including metadata, servers, security schemes, and reusable schemas. It also
- * validates the required server configuration during application startup to
- * ensure proper environment setup.
- * Features:
- * - Provides descriptions and metadata for the API, including title, version,
- *   contact information, and license information.
- * - Configures security schemes for securing the API.
- * - Automatically sets up server details based on active Spring profiles.
- * - Validates the server configuration to ensure completeness and consistency.
+ * OpenApiConfig is a configuration class for setting up OpenAPI specifications and server
+ * URLs for the application. This class handles the initialization of important metadata,
+ * server environments, and OpenAPI components to support API documentation and client integrations.
+ * It integrates with the Spring Framework to retrieve required properties, establish server
+ * configurations, and validate the completeness of the OpenAPI setup. The validation process
+ * helps ensure that the application is properly configured for different environments (development,
+ * staging, production) and appropriate API documentation is generated.
+ * The key responsibilities of this class are:
+ * - Validating the configuration for OpenAPI setup during application initialization.
+ * - Defining metadata, servers, security schemes, and reusable schemas for the OpenAPI specification.
+ * - Dynamically configuring server URLs based on active Spring profiles.
  */
 @Configuration
 public class OpenApiConfig {
@@ -48,31 +48,25 @@ public class OpenApiConfig {
     private static final Logger logger = LoggerFactory.getLogger(OpenApiConfig.class);
 
     /**
-     * Constructs an OpenApiConfig instance, initializing the configuration of the OpenAPI
-     * documentation with application-specific details such as server URLs, environment
-     * metadata, and application properties.
+     * Constructs an instance of the OpenApiConfig class, initializing the application name,
+     * server URLs for different environments, and OpenAPI properties. These values are
+     * typically injected from application properties or determined by the server configuration.
      *
-     * @param applicationName the name of the application, injected from the configuration property `spring.application.name`
-     * @param defaultServerUrl the default server URL for the OpenAPI documentation, injected from the configuration property `springdoc.server.url`
-     * @param devServerUrl the server URL specific to the development environment, injected from the configuration property `springdoc.server.dev.url`
-     * @param stagingServerUrl the server URL specific to the staging environment, injected from the configuration property `springdoc.server.staging.url`
-     * @param prodServerUrl the server URL specific to the production environment, injected from the configuration property `springdoc.server.prod.url`
-     * @param environment an instance of the {@link Environment} that provides access to application profiles and environment properties
-     * @param properties an instance of {@link OpenApiProperties} that holds the OpenAPI configuration properties such as metadata and contact information
+     * @param applicationName the name of the application, injected from the property "spring.application.name"
+     * @param serverUrlConfig an instance of ServerUrlConfig containing server URLs for different environments
+     * @param environment     the spring Environment object that provides the current active profiles and properties
+     * @param properties      an instance of OpenApiProperties containing OpenAPI-specific settings and configurations
      */
     public OpenApiConfig(
             @Value("${spring.application.name}") String applicationName,
-            @Value("${springdoc.server.url}") String defaultServerUrl,
-            @Value("${springdoc.server.dev.url}") String devServerUrl,
-            @Value("${springdoc.server.staging.url}") String stagingServerUrl,
-            @Value("${springdoc.server.prod.url}") String prodServerUrl,
+            ServerUrlConfig serverUrlConfig,
             Environment environment,
             OpenApiProperties properties) {
         this.applicationName = applicationName;
-        this.defaultServerUrl = defaultServerUrl;
-        this.devServerUrl = devServerUrl;
-        this.stagingServerUrl = stagingServerUrl;
-        this.prodServerUrl = prodServerUrl;
+        this.defaultServerUrl = serverUrlConfig.getDefaultUrl();
+        this.devServerUrl = serverUrlConfig.getDevUrl();
+        this.stagingServerUrl = serverUrlConfig.getStagingUrl();
+        this.prodServerUrl = serverUrlConfig.getProdUrl();
         this.environment = environment;
         this.properties = properties;
     }
